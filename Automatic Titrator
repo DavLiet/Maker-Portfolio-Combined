@@ -1,0 +1,113 @@
+char Sensor[]="pH Sensor"; //The pH sensor being used is from Vernier. This sensor is an analog sensor which has a linear callibration. Below are the slope and intercepts used in the y=mx + b.
+float Intercept = 13.720;
+float Slope = -3.838;
+int TimeBetweenReadings = 500; // in milliseconds
+int ReadingNumber=0;
+
+#include <Servo.h> //this is the library necessary to control the servo motor that will be used to turn the stopcock of the buret.
+Servo myservo;  // create servo object to control a servo 
+                
+ 
+int pos = 0;
+ 
+
+
+ 
+void setup() 
+{
+ myservo.attach(9);
+
+  Serial.begin(9600); //start serial communication at 9600 baud
+  Serial.println("Vernier Format 2");
+  Serial.print(Sensor);
+  Serial.print(" ");
+  Serial.println("Readings taken using Ardunio");
+  Serial.println("Data Set");
+  Serial.print("Time");//long name
+  Serial.print("\t"); //tab character
+  Serial.println ("pH"); //change to match sensor
+  Serial.print("t");//short name
+  Serial.print("\t"); //tab character
+  Serial.println ("pH"); //short name, change to match sensor 
+  Serial.print("seconds");//units
+  Serial.print("\t"); // tab character
+  Serial.println ("units"); //change to match sensor
+  
+}
+void loop() 
+{
+
+  delay(2000);
+float Time;
+ 
+//the division is done first so that overflows can be avoided
+  Serial.print(ReadingNumber/1000.0*TimeBetweenReadings); 
+  float Count = analogRead(A0);
+  float Voltage = Count / 1023 * 5.0;// convert from count to raw voltage
+  float SensorReading= Intercept + Voltage * Slope; //converts voltage to sensor reading that is readable
+
+  Serial.print("\t"); // tab character
+  Serial.println(SensorReading);
+  delay(TimeBetweenReadings);// delay in between reads for stability
+  ReadingNumber++;
+
+
+  
+ if( SensorReading <= 4)  //if the pH reading is less than or equal to four , then the servo motor will turn in increments of 90 degrees for THREE seconds
+{
+  
+  for(pos = 0; pos <= 180; pos+=90) // goes from 0 degrees to 180 degrees 
+  {                                  // in increments of 90 degrees
+    myservo.write(pos);              // tell servo to go to position in variable called "pos" 
+         delay(3000);                 // wait 3 seconds for the servo to reach the position 
+  }   
+}
+ if( SensorReading <= 5 && SensorReading > 4) //if the pH reading is greater than four and less than or equal to five, then the servo motor will turn in increments of 90 degrees for TWO seconds
+ {
+    for(pos = 0; pos<=180; pos+=90)
+    { 
+      myservo.write(pos);
+      delay(2000);
+    }
+ }
+ if( SensorReading <= 6 && SensorReading > 5) //if the pH reading is greater than five and less than or equal to six, then the servo motor will turn in increments of 90 degrees for 1.5 seconds
+ {
+    for(pos = 0; pos<=180; pos+=90)
+    {
+      myservo.write(pos);
+      delay(1500);
+    }
+ }
+ if (SensorReading < 6.5 && SensorReading > 6)//if the pH reading is greater than six and less than 6.5, then the servo motor will turn in increments of 90 degrees for ONE seconds
+ {
+  for(pos = 0; pos<=180; pos+=90)
+    {
+      myservo.write(pos);
+      delay(1000);
+    }
+ }
+
+ if(SensorReading < 7 && SensorReading > 6.5)//if the pH reading is greater than 6.5 and less than 7, then the servo motor will turn in increments of 90 degrees for Half of One second.
+ {
+  for(pos = 0; pos<=180; pos+=90)
+    {
+      myservo.write(pos);
+      delay(500);
+    }
+ }
+ if(SensorReading >= 7) //if the pH reading is greater than or equal to 7, then stop the titration! Congratulations, you have just automatically titrated with a Strong Base and a Strong Acid!
+  for(pos = 0; pos<=180; pos+=90)
+    {
+      myservo.write(pos);
+      delay(50000000000000000000000);
+    }
+ }
+ 
+
+ 
+
+
+
+
+
+
