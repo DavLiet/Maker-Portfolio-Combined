@@ -1,0 +1,53 @@
+
+#include <Wire.h>
+#include <FastIO.h>
+#include <I2CIO.h>
+#include <LCD.h>
+#include <LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
+#include <LiquidCrystal_SR.h>
+#include <LiquidCrystal_SR2W.h>
+#include <LiquidCrystal_SR3W.h>
+
+// initialize the library with the numbers of the interface pins
+ LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  //address of I2C lcd screen
+ int backlight = 9;
+ int sensor = 0;
+ int x = 2;
+ int power = 5;
+
+void setup() {
+   pinMode(backlight, OUTPUT);
+   pinMode(power, OUTPUT);
+   pinMode(sensor, INPUT);
+   for(int brightness = 0; brightness <= 150; brightness++){
+    analogWrite(backlight, brightness);
+    delay(5);
+   }
+   
+   // set up the LCD's number of columns and rows: 
+   lcd.begin(16, 2);
+}
+
+void loop() {
+
+  digitalWrite(power, HIGH);
+  delay(50);
+  int val = analogRead(sensor);
+  digitalWrite(power, LOW);
+   lcd.clear();
+  x = (val * -.11862396204033) + 121.35231316726; // 100% saturation point equals 180 and 0% saturation point equals 1023. This is my custom linear regression equation that I have created for my soil moisture sensor
+   lcd.setCursor(0, 0);
+   lcd.print(x);
+   lcd.setCursor(3, 0);
+   lcd.print("%");
+   lcd.setCursor(0, 1);
+   lcd.print(val);
+   // Turn off the blinking cursor:
+//   lcd.noBlink();
+   delay(450);
+   
+    // Turn on the blinking cursor:
+//   lcd.blink();
+//   delay(3000);
+}
